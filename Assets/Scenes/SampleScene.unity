@@ -409,7 +409,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 132, y: 1, z: 111}
+  m_LocalScale: {x: 100, y: 1, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -457,15 +457,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29544f67c03cb734faabd8a8b1a8be39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _drawMode: 1
   _mapWidth: 100
   _mapHeight: 100
-  _noiseScale: 27.8
-  _octaves: 4
-  _persistence: 0.377
+  _noiseScale: 27.9
+  _octaves: 3
+  _persistence: 0.72
   _lacunarity: 2
-  _seed: 150
+  _seed: 16
   _offset: {x: 0, y: 0}
   _autoUpdate: 1
+  _regions:
+  - _name: Ocean
+    _height: 0.3
+    _color: {r: 0, g: 0.49044424, b: 0.89433956, a: 0}
+  - _name: Shore
+    _height: 0.4
+    _color: {r: 0.11900002, g: 0.70455956, b: 1, a: 0}
+  - _name: Sand
+    _height: 0.45
+    _color: {r: 1, g: 0.97678536, b: 0.55700004, a: 0}
+  - _name: LowLand
+    _height: 0.7
+    _color: {r: 0.41104105, g: 0.739, b: 0.29781702, a: 0}
+  - _name: HighLand
+    _height: 0.75
+    _color: {r: 0.3110904, g: 0.557, b: 0.22517021, a: 0}
+  - _name: LowMountain
+    _height: 0.82
+    _color: {r: 0.40392157, g: 0.36078432, b: 0.35686275, a: 0}
+  - _name: HighMountain
+    _height: 0.95
+    _color: {r: 0.3137255, g: 0.28235295, b: 0.2784314, a: 0}
+  - _name: Snow
+    _height: 1
+    _color: {r: 0.9547169, g: 0.9547169, b: 0.9547169, a: 1}
 --- !u!4 &1380074616
 Transform:
   m_ObjectHideFlags: 0

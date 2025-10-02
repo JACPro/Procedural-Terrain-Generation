@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
+    public enum DrawMode { NoiseMap, ColourMap };
+    public DrawMode _drawMode;
+    
     [SerializeField] private int _mapWidth;
     [SerializeField] private int _mapHeight;
     [SerializeField] private float _noiseScale;
@@ -16,13 +19,38 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private Vector2 _offset;
 
     public bool _autoUpdate;
+    [SerializeField] private TerrainType[] _regions;
     
     public void GenerateMap()
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(_mapWidth, _mapHeight, _seed, _noiseScale, _octaves, _persistence, _lacunarity, _offset);
+
+        Color[] colourMap = new Color[_mapWidth * _mapHeight];
+        for (int y = 0; y < _mapHeight; y++)
+        {
+            for (int x = 0; x < _mapWidth; x++)
+            {
+                float currentHeight = noiseMap[x, y];
+                for (int i = 0; i < _regions.Length; i++)
+                {
+                    if (currentHeight <= _regions[i]._height)
+                    {
+                        colourMap[y * _mapWidth + x] = _regions[i]._color;
+                        break;
+                    }
+                }
+            }
+        }
         
         MapDisplay mapDisplay = GetComponent<MapDisplay>();
-        mapDisplay.DrawNoiseMap(noiseMap);
+        if (_drawMode == DrawMode.NoiseMap)
+        {
+            mapDisplay.DrawTexture(TextureGenerator.TextureFromHeightMap(noiseMap));
+        }
+        else if (_drawMode == DrawMode.ColourMap)
+        {
+            mapDisplay.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, _mapWidth, _mapHeight));
+        }
     }
 
     private void OnValidate()
@@ -32,4 +60,12 @@ public class MapGenerator : MonoBehaviour
         if (_lacunarity < 1) _lacunarity = 1;
         if (_octaves < 1) _octaves = 1;
     }
+}
+
+[System.Serializable]
+public struct TerrainType
+{
+    public string _name;
+    public float _height;
+    public Color _color;
 }
