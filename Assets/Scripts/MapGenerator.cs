@@ -6,7 +6,7 @@ public class MapGenerator : MonoBehaviour
     public enum DrawMode { NoiseMap, ColourMap, Mesh };
     public DrawMode _drawMode;
 
-    private const int MapChunkSize = 241;
+    public const int MapChunkSize = 241;
     
     [Range(0, 6)]
     [SerializeField] private int _levelOfDetail;
