@@ -2,18 +2,28 @@ using UnityEngine;
 
 public static class Noise
 {
+    public enum NormalizeMode { Local, Global };
+    
     public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, int seed,
-        float scale, int octaves, float persistence, float lacunarity, Vector2 offset)
+        float scale, int octaves, float persistence, float lacunarity, Vector2 offset, NormalizeMode normalizeMode)
     {
         float[,] noiseMap = new float[mapWidth, mapHeight];
 
         System.Random rng = new System.Random(seed);
         Vector2[] octaveOffsets = new Vector2[octaves];
+        
+        float maxPossibleHeight = 0;
+        float amplitude = 1;
+        float frequency = 1;
+        
         for (int i = 0; i < octaves; i++)
         {
             float offsetX = rng.Next(-100000, 100000) + offset.x;
-            float offsetY = rng.Next(-100000, 100000) + offset.y;
+            float offsetY = rng.Next(-100000, 100000) - offset.y;
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
+            
+            maxPossibleHeight += amplitude;
+            amplitude *= persistence;
         }
         
         if (scale <= 0)
@@ -21,8 +31,8 @@ public static class Noise
             scale = 0.0001f;
         }
         
-        float maxNoiseHeight = float.MinValue;
-        float minNoiseHeight = float.MaxValue;
+        float maxLocalNoiseHeight = float.MinValue;
+        float minLocalNoiseHeight = float.MaxValue;
         
         float halfWidth = mapWidth / 2f;
         float halfHeight = mapHeight / 2f;
@@ -31,14 +41,14 @@ public static class Noise
         {
             for (int x = 0; x < mapWidth; x++)
             {
-                float amplitude = 1;
-                float frequency = 1;
+                amplitude = 1;
+                frequency = 1;
                 float noiseHeight = 0;
                 
                 for (int oct = 0; oct < octaves; oct++)
                 {
-                    float sampleX = (x - halfWidth) / scale * frequency + octaveOffsets[oct].x;
-                    float sampleY = (y - halfHeight) / scale * frequency + octaveOffsets[oct].y;
+                    float sampleX = (x - halfWidth + octaveOffsets[oct].x) / scale * frequency;
+                    float sampleY = (y - halfHeight + octaveOffsets[oct].y) / scale * frequency;
 
                     float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1; // range -1.0 to 1.0
                     noiseHeight += perlinValue * amplitude;
@@ -47,14 +57,14 @@ public static class Noise
                     frequency *= lacunarity;
                 }
 
-                if (noiseHeight > maxNoiseHeight)
+                if (noiseHeight > maxLocalNoiseHeight)
                 {
-                    maxNoiseHeight = noiseHeight;
+                    maxLocalNoiseHeight = noiseHeight;
                 }
 
-                if (noiseHeight < minNoiseHeight)
+                if (noiseHeight < minLocalNoiseHeight)
                 {
-                    minNoiseHeight = noiseHeight;
+                    minLocalNoiseHeight = noiseHeight;
                 }
                 
                 noiseMap[x, y] = noiseHeight;
@@ -65,7 +75,22 @@ public static class Noise
         {
             for (int x = 0; x < mapWidth; x++)
             {
-                noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+                if (normalizeMode == NormalizeMode.Local)
+                {
+                    noiseMap[x, y] = Mathf.InverseLerp(minLocalNoiseHeight, maxLocalNoiseHeight, noiseMap[x, y]);
+                }
+                else
+                {
+                    // need to multiply raw Perlin value by max possible height, but we shifted the noise map value * 2 -1 to get the range -1.0 to 1.0
+                    // so we first revert this operation
+                    float rawPerlinValue = (noiseMap[x, y] + 1) / 2f;
+                    float normalizedHeight = rawPerlinValue / maxPossibleHeight;
+                    // as we will likely never come close to the maximum possible height, all our normalized values are now very low
+                    // to account for this, we will multiply the height by some constant factor
+                    float heightMultiplier = 2.0f;
+                    normalizedHeight *= heightMultiplier;
+                    noiseMap[x, y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
+                }
             }
         }
 
