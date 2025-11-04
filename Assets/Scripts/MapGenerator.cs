@@ -11,7 +11,7 @@ public class MapGenerator : MonoBehaviour
     
     [SerializeField] private Noise.NormalizeMode _normalizeMode;
 
-    public const int MapChunkSize = 241;
+    public const int MapChunkSize = 239;
     
     [FormerlySerializedAs("_levelOfDetail")]
     [Range(0, 6)]
@@ -131,7 +131,7 @@ public class MapGenerator : MonoBehaviour
 
     private MapData GenerateMapData(Vector2 centre)
     {
-        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize, _seed, _noiseScale, _octaves, 
+        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize + 2, MapChunkSize + 2, _seed, _noiseScale, _octaves, 
             _persistence, _lacunarity, centre + _offset, _normalizeMode);
 
         Color[] colourMap = new Color[MapChunkSize * MapChunkSize];
