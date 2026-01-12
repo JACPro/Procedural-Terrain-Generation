@@ -90,6 +90,7 @@ public class EndlessTerrain : MonoBehaviour
 
         private LODInfo[] _detailLevels;
         private LODMesh[] _lodMeshes;
+        private LODMesh _collisionLODMesh;
         
         private MapData _mapData;
         private bool _mapDataReceived;
@@ -119,6 +120,10 @@ public class EndlessTerrain : MonoBehaviour
             for (int i = 0; i < _detailLevels.Length; i++)
             {
                 _lodMeshes[i] = new LODMesh(_detailLevels[i]._lod, UpdateTerrainChunk);
+                if (_detailLevels[i]._useForCollider)
+                {
+                    _collisionLODMesh = _lodMeshes[i];
+                }
             }
             
             _mapGenerator.RequestMapData(_position, OnMapDataReceived);
@@ -170,12 +175,24 @@ public class EndlessTerrain : MonoBehaviour
                     if (lodMesh._hasMesh)
                     {
                         _meshFilter.mesh = lodMesh._mesh;
-                        _meshCollider.sharedMesh = lodMesh._mesh;
                         _previousLODIndex = lodIndex;
                     }
                     else if (!lodMesh._hasRequestedMesh)
                     {
                         lodMesh.RequestMesh(_mapData);
+                    }
+                }
+
+                // If this is a chunk close to the player, i.e. collisions might actually be used
+                if (lodIndex == 0)
+                {
+                    if (_collisionLODMesh._hasMesh)
+                    {
+                        _meshCollider.sharedMesh =  _collisionLODMesh._mesh;
+                    }
+                    else if (!_collisionLODMesh._hasRequestedMesh)
+                    {
+                        _collisionLODMesh.RequestMesh(_mapData);
                     }
                 }
                 
@@ -230,5 +247,6 @@ public class EndlessTerrain : MonoBehaviour
     {
         public int _lod;
         public float _visibleDistThreshold; // this LOD visible when viewer is below this distance away
+        public bool _useForCollider;
     }
 }
