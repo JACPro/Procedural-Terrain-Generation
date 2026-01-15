@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class EndlessTerrain : MonoBehaviour
 {
-    private const float scale = 1.0f;
-    
     private const float _viewerMoveThresholdForChunkUpdate = 25.0f;
     private const float _squareViewerMoveThresholdForChunkUpdate = _viewerMoveThresholdForChunkUpdate * _viewerMoveThresholdForChunkUpdate;
     
@@ -40,7 +38,7 @@ public class EndlessTerrain : MonoBehaviour
     private void Update()
     {
         // Convert viewer position to a coordinate that ignores our scale
-        _viewerPosition = new Vector2(_viewer.position.x, _viewer.position.z) / scale;
+        _viewerPosition = new Vector2(_viewer.position.x, _viewer.position.z) / _mapGenerator._terrainData._uniformScale;
 
         if ((_viewerPositionOld - _viewerPosition).sqrMagnitude > _squareViewerMoveThresholdForChunkUpdate)
         {
@@ -111,8 +109,8 @@ public class EndlessTerrain : MonoBehaviour
             _meshCollider = _meshObject.AddComponent<MeshCollider>();
             _meshRenderer.material = material;
             
-            _meshObject.transform.position = positionV3 * scale;
-            _meshObject.transform.localScale = Vector3.one * scale;
+            _meshObject.transform.position = positionV3 * _mapGenerator._terrainData._uniformScale;
+            _meshObject.transform.localScale = Vector3.one * _mapGenerator._terrainData._uniformScale;
             _meshObject.transform.parent = parent;
             SetVisible(false);
             
